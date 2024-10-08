@@ -58,6 +58,13 @@
 ;; Define regex for Cap'n Proto unique IDs (e.g., @0xbd1f89fa17369103)
 (defvar capnp-unique-id-regexp "@0x[0-9A-Fa-f]+\\b")
 
+;; Extend keywords to include annotation-related targets
+(defvar capnp-annotation-targets
+  '("file" "struct" "field" "union" "group" "enum" "enumerant" "interface" "method" "param" "annotation" "const" "*"))
+
+;; Define regex for annotations (e.g., $foo("bar"))
+(defvar capnp-annotation-regexp "\\([$]\\w+\\)(\\([^)]+\\))?")
+
 ;; Define syntax table to manage comments
 (defvar capnp-mode-syntax-table
   (let ((table (make-syntax-table)))
@@ -75,7 +82,9 @@
     (,capnp-number-regexp . font-lock-constant-face)
     (,capnp-float-regexp . font-lock-constant-face)
     (,capnp-unique-id-regexp . font-lock-constant-face)
-    (,capnp-comment-regexp . font-lock-comment-face)))
+    (,capnp-comment-regexp . font-lock-comment-face)
+    (,capnp-annotation-regexp . ((1 font-lock-preprocessor-face) (2 font-lock-string-face)))
+    (,(regexp-opt capnp-annotation-targets 'words) . font-lock-builtin-face)))
 
 ;; Define simple indentation rules (indent by 2 spaces)
 (defun capnp-indent-line ()
