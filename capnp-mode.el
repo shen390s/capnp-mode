@@ -1,4 +1,4 @@
-;;; capnp-mode.el --- Syntax highlighting for Cap'n'Proto files -*- lexical-binding: t; -*-
+;;; capnp-mode.el --- Major mode for editing Cap'n Proto files -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2024 Rohit Goswami (HaoZeke)
 ;;
@@ -30,21 +30,23 @@
 ;;
 ;;; Code:
 
-;; Define the keywords for Cap'n Proto
+;; Define keywords for Cap'n Proto
 (defvar capnp-keywords
   '("struct" "union" "enum" "interface" "const" "annotation" "using" "extends"))
 
+;; Define built-in types for Cap'n Proto
 (defvar capnp-builtins
   '("Void" "Bool" "Text" "Data" "List" "Int8" "Int16" "Int32" "Int64"
     "UInt8" "UInt16" "UInt32" "UInt64" "Float32" "Float64" "union" "group"))
 
+;; Define constants (e.g., boolean literals) for Cap'n Proto
 (defvar capnp-constants
   '("true" "false" "inf"))
 
-;; Define comment syntax
+;; Define regex for comments (single line starting with #)
 (defvar capnp-comment-regexp "#.*$")
 
-;; Define regex for types
+;; Define regex for types (starting with a letter or underscore)
 (defvar capnp-type-regexp "\\_<\\([A-Za-z_][A-Za-z0-9_]*\\)\\_>")
 
 ;; Define regex for numbers
@@ -53,7 +55,10 @@
 ;; Define regex for floating-point numbers
 (defvar capnp-float-regexp "\\_<[0-9]+\\.[0-9]*\\([eE][-+]?[0-9]+\\)?\\_>")
 
-;; Define the syntax table
+;; Define regex for Cap'n Proto unique IDs (e.g., @0xbd1f89fa17369103)
+(defvar capnp-unique-id-regexp "@0x[0-9A-Fa-f]+\\b")
+
+;; Define syntax table to manage comments
 (defvar capnp-mode-syntax-table
   (let ((table (make-syntax-table)))
     ;; '#' starts a comment
@@ -61,7 +66,7 @@
     (modify-syntax-entry ?\n ">" table)
     table))
 
-;; Define the font lock (syntax highlighting) rules
+;; Define font lock (syntax highlighting) rules
 (defvar capnp-font-lock-keywords
   `((,(regexp-opt capnp-keywords 'words) . font-lock-keyword-face)
     (,(regexp-opt capnp-builtins 'words) . font-lock-type-face)
@@ -69,29 +74,27 @@
     (,capnp-type-regexp . font-lock-variable-name-face)
     (,capnp-number-regexp . font-lock-constant-face)
     (,capnp-float-regexp . font-lock-constant-face)
+    (,capnp-unique-id-regexp . font-lock-constant-face)
     (,capnp-comment-regexp . font-lock-comment-face)))
 
-;; Define indentation rules (simple for now)
+;; Define simple indentation rules (indent by 2 spaces)
 (defun capnp-indent-line ()
   "Indent current line of Cap'n Proto code."
   (interactive)
   (let ((indent-level 2)
-        (not-indented t)
         cur-indent)
     (save-excursion
       (beginning-of-line)
-      (if (looking-at "^[ \t]*\\(}\\|\\)\\)") ;; closing braces
+      ;; Handle opening/closing braces
+      (if (looking-at "^[ \t]*}") ;; Closing brace
           (setq cur-indent (- (current-indentation) indent-level))
-        (if (looking-at "^[ \t]*{") ;; opening braces
-            (setq cur-indent (+ (current-indentation) indent-level))))
-      (if cur-indent
-          (indent-line-to (max cur-indent 0))
-        (indent-line-to 0))))
-  ;; If the point is before the current indentation, move it to the indentation.
-  (if (< (current-column) (current-indentation))
-      (move-to-column (current-indentation))))
+        (if (looking-at "^[ \t]*{") ;; Opening brace
+            (setq cur-indent (+ (current-indentation) indent-level)))))
+    (if cur-indent
+        (indent-line-to (max cur-indent 0))
+      (indent-line-to 0))))
 
-;; Define the mode itself
+;; Define the major mode itself
 (define-derived-mode capnp-mode prog-mode "Cap'n Proto"
   "Major mode for editing Cap'n Proto schema files."
   :syntax-table capnp-mode-syntax-table
@@ -100,9 +103,8 @@
   (setq-local comment-end "")
   (setq-local indent-line-function 'capnp-indent-line))
 
-;; Automatically use capnp-mode for Cap'n Proto files
+;; Automatically use capnp-mode for .capnp files
 (add-to-list 'auto-mode-alist '("\\.capnp\\'" . capnp-mode))
-
 
 (provide 'capnp-mode)
 ;;; capnp-mode.el ends here
