@@ -1,0 +1,113 @@
+* Cap'n'Proto Mode
+:PROPERTIES:
+:CUSTOM_ID: gnu-emacs-syntax-highlighting
+:END:
+
+A major mode based off ~prog-mode~ for basic syntax highlighting of Cap'n Proto
+interface definition files.
+
+Updated and kept here for MELPA usage.
+
+** Table of Contents :TOC:
+- [[#capnproto-mode][Cap'n'Proto Mode]]
+  - [[#installation][Installation]]
+  - [[#status][Status]]
+  - [[#implementation-details][Implementation Details]]
+  - [[#license][License]]
+
+** Installation
+:PROPERTIES:
+:CUSTOM_ID: installation
+:END:
+
+*** Obtaining the Package
+:PROPERTIES:
+:CUSTOM_ID: obtaining-the-package
+:END:
+
+**** MELPA
+:PROPERTIES:
+:CUSTOM_ID: melpa
+:END:
+
+The easiest installation method is via MELPA and it is advisable to use
+one of the many [[https://melpa.org/#/getting-started][MELPA
+installation methods]].
+
+For example, with
+[[https://github.com/jwiegley/use-package][use-package]] one can simply
+use the following:
+
+#+BEGIN_SRC emacs-lisp
+(use-package capnp-mode)
+#+END_SRC
+
+**** Manually
+:PROPERTIES:
+:CUSTOM_ID: manually
+:END:
+
+Assuming for some reason you have downloaded the file to
+=~/.emacs.d/lisp= you would do the following (kanged
+[[http://ergoemacs.org/emacs/emacs_installing_packages.html][from
+here]]):
+
+#+BEGIN_SRC emacs-lisp
+;; Tell emacs where is your personal elisp lib dir
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+;; load the package.
+(load "capnp-mode")
+#+END_SRC
+
+*** Autoloading & Auto-recognition
+:PROPERTIES:
+:CUSTOM_ID: autoloading-auto-recognition
+:END:
+
+To automatically turn on the CAPNP mode for editing your input scripts,
+use the following line as the *first* line of your script:
+
+#+BEGIN_SRC emacs-lisp
+# -*- capnp -*-
+#+END_SRC
+
+For automatically switching on the CAPNP mode based on filename
+patterns, e.g. for =in.*= and =*.lmp= files, add the following code to
+your =.emacs=:
+
+#+BEGIN_SRC emacs-lisp
+(autoload 'capnp-mode "capnp-mode.el" "CAPNP mode." t)
+(setq auto-mode-alist (append auto-mode-alist
+                          '(("in\\." . capnp-mode))
+                          '(("\\.lmp\\'" . capnp-mode))
+                          ))
+#+END_SRC
+
+** Status
+:PROPERTIES:
+:CUSTOM_ID: status
+:END:
+
+By far not all commands are included in the syntax file
+(capnp-mode.el). You can easily add new ones to the existing classes.
+
+** Implementation Details
+:PROPERTIES:
+:CUSTOM_ID: implementation-details
+:END:
+
+=capnp-mode= is derived from =prog-mode= which provides some
+basic syntax highlighting of strings, comments, etc.
+
+The MELPA recipe used for this package is simply:
+
+#+BEGIN_SRC emacs-lisp
+(capnp-mode :fetcher github :repo "HaoZeke/capnp-mode")
+#+END_SRC
+
+** License
+:PROPERTIES:
+:CUSTOM_ID: license
+:END:
+
+MIT
