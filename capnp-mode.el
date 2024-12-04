@@ -104,6 +104,7 @@
       (indent-line-to 0))))
 
 ;; Define the major mode itself
+;;;###autoload
 (define-derived-mode capnp-mode prog-mode "Cap'n Proto"
   "Major mode for editing Cap'n Proto schema files."
   :syntax-table capnp-mode-syntax-table
