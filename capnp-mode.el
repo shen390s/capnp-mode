@@ -88,20 +88,33 @@
 
 ;; Define simple indentation rules (indent by 2 spaces)
 (defun capnp-indent-line ()
-  "Indent current line of Cap'n Proto code."
   (interactive)
-  (let ((indent-level 2)
-        cur-indent)
-    (save-excursion
-      (beginning-of-line)
-      ;; Handle opening/closing braces
-      (if (looking-at "^[ \t]*}") ;; Closing brace
-          (setq cur-indent (- (current-indentation) indent-level))
-        (if (looking-at "^[ \t]*{") ;; Opening brace
-            (setq cur-indent (+ (current-indentation) indent-level)))))
-    (if cur-indent
-        (indent-line-to (max cur-indent 0))
-      (indent-line-to 0))))
+  (beginning-of-line)
+  (if (bobp)
+      (indent-line-to 0)
+    (let ((cur-indent
+	   (save-excursion
+	     (progn
+	       (setq need-search t)
+	       (while need-search
+		 (forward-line -1)
+		 (unless (looking-at "^$")
+		   (setq need-search nil))))
+	     
+	     (let ((pos (current-indentation)))
+	       (if (looking-at "^.*{.*$")
+		   (progn
+		     ;;(message "found { at line %d\n" (line-number-at-pos))
+		     (setq pos (+ pos 2)))
+		 pos)))))
+      (when (looking-at "^[ \t]*}")
+	;;(message "found } at line %d\n" (line-number-at-pos))
+	(setq cur-indent (- cur-indent 2)))
+      ;;(message "indent pos %d @ line %d\n"
+      ;;       cur-indent (line-number-at-pos))
+      (if (> cur-indent 0)
+	  (indent-line-to cur-indent)
+	(indent-line-to 0)))))
 
 ;; Define the major mode itself
 ;;;###autoload
